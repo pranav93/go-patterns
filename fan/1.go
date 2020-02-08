@@ -7,7 +7,7 @@ func main() {
 	fmt.Scanf("%d", &numOfWorkers)
 
 	c := make(chan int)
-	o := make([]chan map[int]int, numOfWorkers)
+	OutChanArr := make([]chan map[int]int, numOfWorkers)
 	done := make(chan bool)
 	collate := make(chan map[int]int)
 
@@ -21,11 +21,10 @@ func main() {
 	}()
 
 	for s := 0; s < numOfWorkers; s++ {
-		out := fact(c, done, s)
-		o = append(o, out)
+		OutChanArr[s] = fact(c, done, s)
 	}
 
-	consume(done, collate, o...)
+	consume(done, collate, OutChanArr...)
 
 	go func() {
 		for s := 0; s < numOfWorkers; s++ {
