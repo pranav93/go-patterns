@@ -4,30 +4,35 @@ import "fmt"
 
 func main() {
 	var numOfWorkers int
-	fmt.Scanf("%d", &numOfWorkers)
+	// How many workers do you want?
+	fmt.Printf("Enter the number of workers to spawn : ")
+	fmt.Scanf("%d\n", &numOfWorkers)
 
 	c := make(chan int)
-	OutChanArr := make([]chan map[int]int, numOfWorkers)
+	outChanArr := make([]chan map[int]int, numOfWorkers)
 	done := make(chan bool)
 	collateChan := make(chan map[int]int)
 
+	// generate some values
 	go genFunc(c)
 
 	for s := 0; s < numOfWorkers; s++ {
-		OutChanArr[s] = fact(c, done, s)
+		// calculate the factorials
+		outChanArr[s] = fact(c, done, s)
 	}
 
-	collateFunc(done, collateChan, OutChanArr...)
+	// collate results from all channels
+	collateFunc(done, collateChan, outChanArr...)
 
 	go func() {
 		for s := 0; s < numOfWorkers; s++ {
-			<-done
+			<-done // syncronise the goroutines
 		}
 		close(collateChan)
 	}()
 
 	for i := range collateChan {
-		fmt.Println(i)
+		fmt.Println(i) // Print the result
 	}
 }
 
