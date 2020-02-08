@@ -9,7 +9,7 @@ func main() {
 	c := make(chan int)
 	OutChanArr := make([]chan map[int]int, numOfWorkers)
 	done := make(chan bool)
-	collate := make(chan map[int]int)
+	collateChan := make(chan map[int]int)
 
 	go func() {
 		for i := 0; i < 100; i++ {
@@ -24,16 +24,16 @@ func main() {
 		OutChanArr[s] = fact(c, done, s)
 	}
 
-	consume(done, collate, OutChanArr...)
+	consume(done, collateChan, OutChanArr...)
 
 	go func() {
 		for s := 0; s < numOfWorkers; s++ {
 			<-done
 		}
-		close(collate)
+		close(collateChan)
 	}()
 
-	for i := range collate {
+	for i := range collateChan {
 		fmt.Println(i)
 	}
 
@@ -58,12 +58,12 @@ func fact(cin <-chan int, done chan bool, routineName int) chan map[int]int {
 	return cout
 }
 
-func consume(done chan bool, collate chan map[int]int, c ...chan map[int]int) {
+func consume(done chan bool, collateChan chan map[int]int, c ...chan map[int]int) {
 	for idx, ci := range c {
 		go func(ci chan map[int]int, idx int) {
 			counter := 0
 			for i := range ci {
-				collate <- i
+				collateChan <- i
 				counter++
 			}
 			fmt.Println("Goroutine consume ", idx, "consumed", counter, "items")
