@@ -7,7 +7,7 @@ func main() {
 	fmt.Scanf("%d", &numOfWorkers)
 
 	c := make(chan int)
-	var o []chan map[int]int
+	o := make([]chan map[int]int, numOfWorkers)
 	done := make(chan bool)
 	collate := make(chan map[int]int)
 
